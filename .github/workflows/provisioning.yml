@@ -30,7 +30,7 @@ jobs:
         run: |
           echo "Received Notification with Payload"
           echo "$NOTIFICATION_PAYLOAD"
-          FORMATTED_INPUT=$(echo "$NOTIFICATION_PAYLOAD" | jq -c '.data | {key1: .source, key2: .value}')
+          FORMATTED_INPUT=$(echo "$NOTIFICATION_PAYLOAD" | echo $NOTIFICATION_PAYLOAD | jq -c '(.notification.service.dimensions) * (.notification.service.attributes) * (.notification.link?.attributes // {}) * (.notification.parameters)')
           echo "formatted_input=${FORMATTED_INPUT}" >> $GITHUB_OUTPUT
 
   worker:
