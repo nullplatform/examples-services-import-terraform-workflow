@@ -1,0 +1,20 @@
+name: Dummy Input Receiver
+
+on:
+  workflow_dispatch:
+    inputs:
+      input:
+        type: string
+        description: some input
+        required: true
+
+jobs:
+  process-input:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Received Input
+        env:
+          INPUT_PAYLOAD: ${{ inputs.input }}
+        run: |
+          echo "Received Input:"
+          echo "$INPUT_PAYLOAD" | jq .
