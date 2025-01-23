@@ -7,14 +7,18 @@ on:
         type: string
         description: nullplatform service lifecycle workflow context
         required: true
+
 permissions:
   id-token: write
   contents: read
   packages: read
   actions: write
+
 jobs:
   process-notification:
     runs-on: ubuntu-latest
+    outputs:
+      formatted_input: ${{ steps.parse-notification.outputs.formatted_input }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -29,31 +33,21 @@ jobs:
           FORMATTED_INPUT=$(echo "$NOTIFICATION_PAYLOAD" | jq -c '.data | {key1: .source, key2: .value}')
           echo "formatted_input=${FORMATTED_INPUT}" >> $GITHUB_OUTPUT
 
-      - name: Trigger Worker Workflow
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const inputString = `${{ steps.parse-notification.outputs.formatted_input }}`;
-            const formattedInput = JSON.stringify({ input: inputString });
+  worker:
+    needs: process-notification
+    uses: nullplatform/examples-services-import-terraform-workflow/.github/workflows/worker.yml@main
+    with:
+      input: ${{ needs.process-notification.outputs.formatted_input }}
 
-            github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'worker.yml',
-              ref: '${{ github.ref }}',
-              inputs: JSON.parse(formattedInput)
-              });
-
+  update-status:
+    needs: worker
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
       - name: Update Entity Status
-        if: ${{ always() }}
         env:
           NULLPLATFORM_API_KEY: ${{ secrets.NULLPLATFORM_API_KEY }}
         run: |
-          STATUS=${{ contains(fromJSON('["failure", "cancelled"]'), job.status) && 'failed' || 'success' }}
-          
-          if [[ $LINK_ID ]]; then
-            np link action update --status $STATUS --messages '[]' --results '{}'
-          elif [[ $SERVICE_ID ]]; then
-            np service action update --status $STATUS --messages '[]' --results '{}'
-          fi
+          STATUS=${{ contains(fromJSON('["failure", "cancelled"]'), needs.worker.result) && 'failed' || 'success' }}
+
+          echo "Workcall status is $STATUS"

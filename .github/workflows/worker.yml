@@ -1,7 +1,7 @@
 name: Dummy Input Receiver
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       input:
         type: string
