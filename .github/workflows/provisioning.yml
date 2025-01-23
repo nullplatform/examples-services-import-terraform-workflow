@@ -37,7 +37,7 @@ jobs:
     needs: process-notification
     uses: nullplatform/examples-services-import-terraform-workflow/.github/workflows/worker.yml@main
     with:
-      input: ${{ needs.process-notification.outputs.formatted_input }}
+      notification: ${{ needs.process-notification.outputs.formatted_input }}
 
   update-status:
     needs: worker

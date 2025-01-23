@@ -3,7 +3,7 @@ name: Dummy Input Receiver
 on:
   workflow_call:
     inputs:
-      input:
+      notification:
         type: string
         description: some input
         required: true
@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Print Received Input
         env:
-          INPUT_PAYLOAD: ${{ inputs.input }}
+          INPUT_PAYLOAD: ${{ inputs.notification }}
         run: |
           echo "Received Input:"
           echo "$INPUT_PAYLOAD" | jq .
