@@ -44,10 +44,25 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
+      - name: Install nullplatform cli
+        run: curl https://cli.nullplatform.com/install.sh | sh
       - name: Update Entity Status
         env:
           NULLPLATFORM_API_KEY: ${{ secrets.NULLPLATFORM_API_KEY }}
+          NOTIFICATION_PAYLOAD: ${{ inputs.context }}
         run: |
           STATUS=${{ contains(fromJSON('["failure", "cancelled"]'), needs.worker.result) && 'failed' || 'success' }}
 
           echo "Workcall status is $STATUS"
+
+          export LINK_ID=$(echo $NOTIFICATION_PAYLOAD | jq -r .notification.link.id)
+          export SERVICE_ID=$(echo $NOTIFICATION_PAYLOAD | jq -r .notification.service.id)
+
+          echo "LINK_ID is $LINK_ID"
+          echo "SERVICE_ID is $SERVICE_ID"
+
+          if [[ $LINK_ID ]]; then
+            np link action update --status ${{ contains(fromJSON('["failure", "cancelled"]'), job.status) && 'failed' || 'success' }} --messages '[]' --results '{}'
+          elif [[ $SERVICE_ID ]]; then
+            np service action update --status ${{ contains(fromJSON('["failure", "cancelled"]'), job.status) && 'failed' || 'success' }} --messages '[]' --results '{}'
+          fi

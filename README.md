@@ -40,7 +40,7 @@ This is an example of the nullplatform service notification:
     "parameters": {
       "parameter1": 1234,
       "parameter2": "some-string",
-      "parameter3": true,
+      "parameter3": true
     },
     "results": {},
     "type": "create",
@@ -54,7 +54,7 @@ This is an example of the nullplatform service notification:
       "attributes": {
         "parameter1": 4321,
         "parameter4": "some-service-value",
-        "parameter5": "other-service-value",
+        "parameter5": "other-service-value"
       },
       "specification": {
         "id": "some-uuid",
@@ -71,7 +71,7 @@ This is an example of the nullplatform service notification:
       "attributes": {
         "parameter1": 111,
         "parameter4": "some-link-value",
-        "parameter6": "other-link-value",
+        "parameter6": "other-link-value"
       },
       "specification": {
         "id": "some-uuid",
@@ -103,16 +103,16 @@ The notification for this will be:
 
 ```json
 {
-	"notification": {
-	  "parameter1": 1234, // The value in .notification.parameters has the higher priority
-      "parameter2": "some-string",
-      "parameter3": true,
-      "parameter4": "some-link-value", // The value in .notification.link.attributes has a higher priority than the one in .notification.service.attributes
-      "parameter5": "other-service-value", // Values in .notification.service.attributes have the least priority
-      "parameter6": "other-link-value",
-      "environment": "dev", // Dimensions are added for context from .notification.service.dimensions
-      "country": "arg"
-	}
+  "notification": {
+    "parameter1": 1234, // The value in .notification.parameters has the highest priority
+    "parameter2": "some-string",
+    "parameter3": true,
+    "parameter4": "some-link-value", // The value in .notification.link.attributes has a higher priority than the one in .notification.service.attributes
+    "parameter5": "other-service-value", // Values in .notification.service.attributes have the least priority
+    "parameter6": "other-link-value",
+    "environment": "dev", // Dimensions are added for context from .notification.service.dimensions
+    "country": "arg"
+  }
 }
 ```
 
